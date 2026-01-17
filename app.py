@@ -146,3 +146,95 @@ st.dataframe(
 )
 
 
+st.divider()
+st.subheader("🤖 AI Assistant (Ask About Your Properties)")
+
+question = st.text_input(
+    "Ask a question (e.g. 'How many flats are empty in Gurgaon?')"
+)
+
+if question:
+    q = question.lower()
+
+    # 1️⃣ Empty units
+    if "empty" in q and "flat" in q:
+        result = df[df["unit_status"] == "EMPTY"]
+        st.success(f"There are {len(result)} empty units.")
+        st.dataframe(
+            result[["property_name", "city", "unit_number", "expected_rent"]],
+            use_container_width=True
+        )
+
+    # 2️⃣ Total rent
+    elif "total rent" in q or "monthly rent" in q:
+        total_rent = df["rent_amount_paid"].fillna(0).sum()
+        st.success(f"Your total monthly rent is ₹{int(total_rent)}")
+
+    # 3️⃣ City-based query
+    elif "gurgaon" in q:
+        city_df = df[df["city"].str.lower() == "gurgaon"]
+        st.success(f"You have {city_df['unit_id'].nunique()} units in Gurgaon.")
+        st.dataframe(
+            city_df[["property_name", "unit_number", "unit_status", "expected_rent"]],
+            use_container_width=True
+        )
+
+    # 4️⃣ Investment properties
+    elif "investment" in q:
+        invest_df = df[df["saved_for_investment"] == "YES"]
+        st.success("These properties are marked for investment:")
+        st.dataframe(
+            invest_df[
+                ["property_name", "city", "investment_expected_roi", "investment_priority"]
+            ].drop_duplicates(),
+            use_container_width=True
+        )
+
+    else:
+        st.warning(
+            "I can answer questions about empty units, rent, city-wise data, and investments."
+        )
+        
+        
+import openai
+import os
+
+openai.api_key = st.secrets["OPENAI_API_KEY"]
+
+st.divider()
+st.subheader("🤖 AI Assistant (LLM Powered)")
+
+user_question = st.text_area(
+    "Ask anything about your properties:",
+    placeholder="e.g. How much rent am I getting from Noida?"
+)
+
+if st.button("Ask AI") and user_question:
+
+    with st.spinner("AI is thinking..."):
+        # Prepare a safe data summary
+        data_context = df.head(50).to_string(index=False)
+
+        system_prompt = f"""
+You are a helpful property management AI assistant.
+Answer questions ONLY using the data provided.
+If the answer is not in the data, say you don't know.
+
+DATA:
+{data_context}
+"""
+
+        response = openai.ChatCompletion.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_question}
+            ],
+            temperature=0
+        )
+
+        answer = response.choices[0].message.content
+        st.success(answer)
+
+
+
