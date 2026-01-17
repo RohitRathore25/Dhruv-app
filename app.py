@@ -196,7 +196,7 @@ if question:
         )
         
              
-from openai import OpenAI
+import openai
 import streamlit as st
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
