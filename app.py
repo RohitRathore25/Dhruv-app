@@ -10,7 +10,7 @@ st.title("🏢 Rai Properties")
 
 @st.cache_data
 def load_data():
-    return pd.read_csv("D:\Sagarpur Project\Rai_Properties_Dataset.csv")
+    return pd.read_csv("Rai_Properties_Dataset.csv")
 
 df = load_data()
 
@@ -28,7 +28,7 @@ st.title("🏢 Rai Properties Dashboard")
 
 @st.cache_data
 def load_data():
-    return pd.read_csv("D:\Sagarpur Project\Rai_Properties_Dataset.csv")
+    return pd.read_csv("Rai_Properties_Dataset.csv")
 
 df = load_data()
 
