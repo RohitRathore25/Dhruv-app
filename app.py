@@ -195,9 +195,11 @@ if question:
             "I can answer questions about empty units, rent, city-wise data, and investments."
         )
         
-        
-import openai
-import os
+             
+from openai import OpenAI
+import streamlit as st
+
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
@@ -224,17 +226,17 @@ DATA:
 {data_context}
 """
 
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
+                
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_question}
-            ],
+                ],
             temperature=0
-        )
-
+            )
+        
         answer = response.choices[0].message.content
         st.success(answer)
-
 
 
